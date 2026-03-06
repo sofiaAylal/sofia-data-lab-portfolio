@@ -8,443 +8,605 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .dark-glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .progress-bar { height: 4px; background: linear-gradient(to right, #4f46e5, #9333ea); width: 0%; position: fixed; top: 0; z-index: 100; }
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .slideshow-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
-        .slide { position: absolute; width: 100%; height: 100%; transform: translateX(100%); transition: transform 0.7s ease-in-out; object-fit: cover; }
-        .slide.active { transform: translateX(0); }
-        .carousel-wrapper { position: relative; padding: 0 70px 80px 70px; margin: 0 -70px -80px -70px; }
-        .carousel-container { display: flex; gap: 48px; overflow-x: hidden; scroll-behavior: smooth; }
-        .carousel-card { flex: 0 0 calc(50% - 24px); min-width: calc(50% - 24px); }
-        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 20; background-color: #4f46e5; color: white; border-radius: 9999px; width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .carousel-btn:hover { background-color: #4338ca; }        .carousel-btn-prev { left: 12px; }
-        .carousel-btn-next { right: 12px; }
-        .mini-card { flex: 0 0 240px; min-width: 240px; }
-        .interests-container { overflow-x: visible; justify-content: center; }
-        /* Dark mode overrides for common utility classes so cards and badges invert properly */
-        .dark .glass { background: rgba(15, 23, 42, 0.8) !important; border-color: rgba(139, 92, 246, 0.3) !important; }
-        .dark .bg-white { background-color: #1a1f3a !important; color: #f0f4ff !important; }
-        .dark .bg-slate-50 { background-color: #0f172a !important; color: #f0f4ff !important; }
-        .dark .text-slate-900 { color: #f0f4ff !important; }
-        .dark .border-slate-100 { border-color: rgba(139, 92, 246, 0.2) !important; }
-        .dark .bg-indigo-100 { background-color: rgba(79, 70, 229, 0.25) !important; color: #a5b4fc !important; }
-        .dark .bg-white\/10 { background-color: rgba(255, 255, 255, 0.08) !important; }
-        .dark .bg-white\/20 { background-color: rgba(139, 92, 246, 0.15) !important; color: #f0f4ff !important; }
-        .dark .bg-purple-100 { background-color: rgba(139, 92, 246, 0.2) !important; color: #d8b4fe !important; }
-        .dark .bg-pink-100 { background-color: rgba(244, 114, 182, 0.15) !important; color: #fbcfe8 !important; }
-        .dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.15) !important; color: #bfdbfe !important; }
-        .dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.15) !important; color: #a7f3d0 !important; }
-        .dark .bg-yellow-100 { background-color: rgba(251, 191, 36, 0.15) !important; color: #fef08a !important; }
-        .dark .bg-cyan-100 { background-color: rgba(34, 211, 238, 0.15) !important; color: #a5f3fc !important; }
-        .dark .bg-green-100 { background-color: rgba(34, 197, 94, 0.15) !important; color: #bbf7d0 !important; }
-        .dark .bg-orange-100 { background-color: rgba(249, 115, 22, 0.15) !important; color: #fed7aa !important; }
-        .dark .bg-rose-100 { background-color: rgba(244, 63, 94, 0.15) !important; color: #fbcfe8 !important; }
-        .dark .bg-slate-100 { background-color: #0f172a !important; color: #f0f4ff !important; }
-        .dark .bg-slate-900 { background-color: #0a0e1a !important; }
-        a.bg-slate-900 { background-color: #1e293b !important; }
-        a.bg-slate-900:hover { background-color: #0f172a !important; }
-        .dark a.bg-slate-900 { background-color: #4b5563 !important; }
-        .dark a.bg-slate-900:hover { background-color: #3b4553 !important; }
-        .dark .border-white { border-color: rgba(139, 92, 246, 0.3) !important; }
-        .dark .text-slate-500 { color: rgba(255, 255, 255, 0.85) !important; }
-        .dark .text-slate-600 { color: rgba(226, 232, 240, 0.9) !important; }
-        .dark .text-slate-400 { color: rgba(226, 232, 240, 0.7) !important; }
-        /* Footer contrast in dark mode: slightly lighter than page background for clear separation */
-        .dark footer { background-color: #1f2937 !important; border-top: 1px solid rgba(139, 92, 246, 0.2) !important; }
-        .dark footer .text-slate-300 { color: #f0f4ff !important; }
-        .dark footer .text-slate-500 { color: #d1d5db !important; }
-        .dark footer .bg-white\/10 { background-color: rgba(139, 92, 246, 0.2) !important; }
-        .dark .shadow-xl { box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1) !important; }
-        .dark .hover\:border-indigo-200:hover { border-color: rgba(139, 92, 246, 0.5) !important; }
+
+        /* ── Glass ── */
+        .glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.35); }
+
+        /* ── Progress bar ── */
+        .progress-bar { height: 3px; background: linear-gradient(to right,#4f46e5,#9333ea); width:0%; position:fixed; top:0; z-index:100; }
+
+        /* ── Reveal animation ── */
+        .reveal { opacity:0; transform:translateY(24px); transition:all 0.7s ease-out; }
+        .reveal.active { opacity:1; transform:translateY(0); }
+
+        /* ── Slideshow ── */
+        .slide { position:absolute; inset:0; transform:translateX(100%); transition:transform 0.7s ease-in-out; object-fit:cover; width:100%; height:100%; }
+        .slide.active { transform:translateX(0); }
+
+        /* ══════════════════════════════
+           CAROUSEL — mobile-first
+        ══════════════════════════════ */
+        .carousel-outer {
+            position: relative;
+            /* On mobile: no horizontal padding (arrows hidden) */
+        }
+        .carousel-track {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            /* hide scrollbar */
+            scrollbar-width: none;
+            padding-bottom: 8px;
+        }
+        .carousel-track::-webkit-scrollbar { display: none; }
+
+        /* Mobile: 1 card full-width */
+        .proj-card     { flex: 0 0 100%; min-width: 100%; }
+        .interest-card { flex: 0 0 260px; min-width: 260px; }
+
+        /* ≥ 768 px: 2 proj-cards, 2 interest-cards */
+        @media (min-width: 768px) {
+            .proj-card     { flex: 0 0 calc(50% - 10px); min-width: calc(50% - 10px); }
+            .interest-card { flex: 0 0 calc(50% - 10px); min-width: calc(50% - 10px); }
+            .carousel-outer { padding: 0 52px; }
+        }
+        /* ≥ 1024 px: 2 proj-cards, 4 interest-cards */
+        @media (min-width: 1024px) {
+            .carousel-outer { padding: 0 64px; }
+            .carousel-track  { gap: 24px; }
+            .proj-card     { flex: 0 0 calc(50% - 12px); min-width: calc(50% - 12px); }
+            .interest-card { flex: 0 0 calc(25% - 18px); min-width: calc(25% - 18px); }
+        }
+
+        /* Arrows: hidden on small screens */
+        .carousel-btn {
+            display: none;
+        }
+        @media (min-width: 640px) {
+            .carousel-btn {
+                display: flex;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 20;
+                background-color: #4f46e5;
+                color: white;
+                border-radius: 9999px;
+                width: 2.75rem; height: 2.75rem;
+                align-items: center; justify-content: center;
+                cursor: pointer;
+                transition: background 0.2s, box-shadow 0.2s;
+                box-shadow: 0 8px 20px rgba(79,70,229,0.35);
+                border: none;
+            }
+            .carousel-btn:hover { background-color: #4338ca; }
+            .carousel-btn-prev { left: 0; }
+            .carousel-btn-next { right: 0; }
+        }
+
+        /* ── Scroll hint dots ── */
+        .scroll-dots { display:flex; justify-content:center; gap:6px; margin-top:16px; }
+        .scroll-dot  { width:6px; height:6px; border-radius:9999px; background:#cbd5e1; transition:background 0.3s,width 0.3s; }
+        .scroll-dot.active { background:#4f46e5; width:18px; }
+
+        /* ── Mobile menu ── */
+        #mobileMenu { display:none; }
+        #mobileMenu.open { display:flex; }
+
+        /* ══════════════════
+           DARK MODE
+        ══════════════════ */
+        .dark .glass  { background:rgba(15,23,42,0.85)!important; border-color:rgba(139,92,246,0.3)!important; }
+        .dark .bg-white { background-color:#1a1f3a!important; color:#f0f4ff!important; }
+        .dark .bg-slate-50  { background-color:#0f172a!important; color:#f0f4ff!important; }
+        .dark .bg-slate-100 { background-color:#0f172a!important; color:#f0f4ff!important; }
+        .dark .text-slate-900 { color:#f0f4ff!important; }
+        .dark .text-slate-600 { color:rgba(226,232,240,0.9)!important; }
+        .dark .text-slate-500 { color:rgba(255,255,255,0.75)!important; }
+        .dark .text-slate-400 { color:rgba(226,232,240,0.65)!important; }
+        .dark .border-slate-100 { border-color:rgba(139,92,246,0.2)!important; }
+        .dark .border-white { border-color:rgba(139,92,246,0.3)!important; }
+        .dark .hover\:border-indigo-200:hover { border-color:rgba(139,92,246,0.5)!important; }
+        .dark .bg-indigo-100  { background-color:rgba(79,70,229,0.25)!important; color:#a5b4fc!important; }
+        .dark .bg-purple-100  { background-color:rgba(139,92,246,0.2)!important; color:#d8b4fe!important; }
+        .dark .bg-pink-100    { background-color:rgba(244,114,182,0.15)!important; color:#fbcfe8!important; }
+        .dark .bg-blue-100    { background-color:rgba(59,130,246,0.15)!important; color:#bfdbfe!important; }
+        .dark .bg-emerald-100 { background-color:rgba(16,185,129,0.15)!important; color:#a7f3d0!important; }
+        .dark .bg-yellow-100  { background-color:rgba(251,191,36,0.15)!important; color:#fef08a!important; }
+        .dark .bg-cyan-100    { background-color:rgba(34,211,238,0.15)!important; color:#a5f3fc!important; }
+        .dark .bg-green-100   { background-color:rgba(34,197,94,0.15)!important; color:#bbf7d0!important; }
+        .dark .bg-orange-100  { background-color:rgba(249,115,22,0.15)!important; color:#fed7aa!important; }
+        .dark .bg-rose-100    { background-color:rgba(244,63,94,0.15)!important; color:#fbcfe8!important; }
+        .dark .bg-white\/10   { background-color:rgba(255,255,255,0.08)!important; }
+        .dark .bg-white\/20   { background-color:rgba(139,92,246,0.15)!important; }
+        .dark .bg-slate-900   { background-color:#0a0e1a!important; }
+        .dark footer { background-color:#1f2937!important; border-top:1px solid rgba(139,92,246,0.2)!important; }
+        .dark footer .text-slate-300 { color:#f0f4ff!important; }
+        .dark footer .text-slate-500 { color:#d1d5db!important; }
+        .dark .shadow-xl { box-shadow:0 20px 25px -5px rgba(139,92,246,0.1)!important; }
+
+        /* ── Hero blob ── */
+        @keyframes blob { 0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(15px,-10px) scale(1.05)}66%{transform:translate(-10px,15px) scale(0.97)} }
+        .animate-blob { animation:blob 8s infinite; }
+        .animation-delay-2000 { animation-delay:2s; }
+
+        /* ── Typography scale for small screens ── */
+        @media (max-width: 640px) {
+            h1.hero-title { font-size: 2.6rem !important; line-height: 1.15 !important; }
+        }
+
+        /* ── Nav link active indicator ── */
+        .nav-link { position:relative; }
+        .nav-link::after { content:''; position:absolute; bottom:-4px; left:0; width:0; height:2px; background:linear-gradient(to right,#4f46e5,#9333ea); transition:width 0.3s; border-radius:2px; }
+        .nav-link:hover::after { width:100%; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 transition-colors duration-300" id="body">
 
     <div id="scrollProgress" class="progress-bar"></div>
 
-    <nav class="fixed w-full z-50 px-6 py-4">
-        <div class="max-w-6xl mx-auto glass rounded-2xl px-6 py-3 flex justify-between items-center shadow-lg">
-            <span class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">S. AYLAL</span>
-            <div class="hidden md:flex space-x-8 items-center font-semibold text-sm uppercase tracking-wider">
-                <a href="#about" class="hover:text-indigo-600 transition">About</a>
-                <a href="#projects" class="hover:text-indigo-600 transition">Projects</a>
-                <a href="#interests" class="hover:text-indigo-600 transition">Interests</a>
-                <a href="#experience" class="hover:text-indigo-600 transition">Journey</a>
-                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 transition">
-                    <i data-lucide="moon" id="themeIcon"></i>
+    <!-- ═══════════════════════════
+         NAV
+    ═══════════════════════════ -->
+    <nav class="fixed w-full z-50 px-3 sm:px-6 py-3">
+        <div class="max-w-6xl mx-auto glass rounded-2xl px-4 sm:px-6 py-3 flex justify-between items-center shadow-lg">
+            <span class="text-lg sm:text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">S. AYLAL</span>
+
+            <!-- Desktop links -->
+            <div class="hidden md:flex space-x-6 items-center font-semibold text-sm uppercase tracking-wider">
+                <a href="#about"      class="nav-link hover:text-indigo-600 transition">About</a>
+                <a href="#projects"   class="nav-link hover:text-indigo-600 transition">Projects</a>
+                <a href="#interests"  class="nav-link hover:text-indigo-600 transition">Interests</a>
+                <a href="#experience" class="nav-link hover:text-indigo-600 transition">Journey</a>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 transition" aria-label="Toggle dark mode">
+                    <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
                 </button>
             </div>
-            <a href="mailto:sofiaa.aylal@gmail.com" class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:scale-105 transition shadow-indigo-200 shadow-lg">Contact Me</a>
+
+            <!-- Mobile right side -->
+            <div class="flex md:hidden items-center gap-2">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 transition" aria-label="Toggle dark mode">
+                    <i data-lucide="moon" id="themeIconMobile" class="w-4 h-4"></i>
+                </button>
+                <button onclick="toggleMobileMenu()" class="p-2 rounded-xl hover:bg-slate-100 transition" aria-label="Open menu" id="hamburgerBtn">
+                    <i data-lucide="menu" class="w-5 h-5" id="hamburgerIcon"></i>
+                </button>
+            </div>
+
+            <a href="/cdn-cgi/l/email-protection#a2d1cdc4cbc3c38cc3dbcec3cee2c5cfc3cbce8cc1cdcf" class="hidden md:inline-flex bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:scale-105 transition shadow-indigo-200 shadow-lg">Contact Me</a>
+        </div>
+
+        <!-- Mobile menu dropdown -->
+        <div id="mobileMenu" class="md:hidden flex-col gap-1 mt-2 mx-3 glass rounded-2xl px-5 py-5 shadow-xl">
+            <a href="#about"      onclick="closeMobileMenu()" class="block py-2.5 font-semibold text-sm uppercase tracking-wider hover:text-indigo-600 transition border-b border-slate-100">About</a>
+            <a href="#projects"   onclick="closeMobileMenu()" class="block py-2.5 font-semibold text-sm uppercase tracking-wider hover:text-indigo-600 transition border-b border-slate-100">Projects</a>
+            <a href="#interests"  onclick="closeMobileMenu()" class="block py-2.5 font-semibold text-sm uppercase tracking-wider hover:text-indigo-600 transition border-b border-slate-100">Interests</a>
+            <a href="#experience" onclick="closeMobileMenu()" class="block py-2.5 font-semibold text-sm uppercase tracking-wider hover:text-indigo-600 transition border-b border-slate-100">Journey</a>
+            <a href="/cdn-cgi/l/email-protection#15667a737c74743b746c797479557278747c793b767a78" class="mt-3 block text-center bg-indigo-600 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 transition">Contact Me</a>
         </div>
     </nav>
 
-    <section id="about" class="min-h-screen flex items-center pt-20 px-6">
-        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <!-- ═══════════════════════════
+         HERO
+    ═══════════════════════════ -->
+    <section id="about" class="min-h-screen flex items-center pt-24 pb-16 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center w-full">
+
             <div class="reveal">
-                <span class="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">Available for Internship</span>
-                <h1 class="text-6xl md:text-7xl font-extrabold mt-6 leading-tight">Crafting Data <br><span class="text-indigo-600">Intelligence.</span></h1>
-                <p class="mt-8 text-lg text-slate-600 leading-relaxed max-w-lg">
-                    Hi, I'm <span class="font-bold text-slate-900">Sofia</span>. I'm a Computer Science enthusiast turned Data Engineer who loves turning messy, raw data into clear, actionable stories. Whether it’s automating database monitoring or designing interactive dashboards, my goal is simple: make data talk so people can listen.
+                <span class="inline-block bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">Available for Internship</span>
+                <h1 class="hero-title text-5xl md:text-6xl lg:text-7xl font-extrabold mt-5 leading-tight">
+                    Crafting Data <br><span class="text-indigo-600">Intelligence.</span>
+                </h1>
+                <p class="mt-6 text-base sm:text-lg text-slate-600 leading-relaxed max-w-lg">
+                    Hi, I'm <span class="font-bold text-slate-900">Sofia</span>. I'm a Computer Science enthusiast turned Data Engineer who loves turning messy, raw data into clear, actionable stories. Whether it's automating database monitoring or designing interactive dashboards, my goal is simple: make data talk so people can listen.
                 </p>
-                <div class="mt-10 flex space-x-4">
-                    <a href="#projects" class="group flex items-center space-x-2 bg-slate-900 dark:bg-gray-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-indigo-600 dark:hover:bg-gray-500 transition-all shadow-xl">
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a href="#projects" class="group flex items-center gap-2 bg-slate-900 text-white px-7 py-3.5 rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-xl text-sm sm:text-base">
                         <span>Explore Projects</span>
                         <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
                     </a>
+                    <a href="/cdn-cgi/l/email-protection#35465a535c54541b544c595459755258545c591b565a58" class="flex items-center gap-2 border-2 border-slate-200 text-slate-700 px-7 py-3.5 rounded-2xl font-bold hover:border-indigo-400 hover:text-indigo-600 transition-all text-sm sm:text-base">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                        <span>Get in touch</span>
+                    </a>
                 </div>
             </div>
-            <div class="relative reveal delay-200">
-                <div class="absolute -top-10 -left-10 w-64 h-64 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-                <div class="absolute -bottom-10 -right-10 w-64 h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-                <div class="bg-white p-8 rounded-3xl shadow-2xl relative">
-                    <div class="grid grid-cols-2 gap-4">
+
+            <div class="relative reveal">
+                <div class="absolute -top-8 -left-8 w-48 sm:w-64 h-48 sm:h-64 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob"></div>
+                <div class="absolute -bottom-8 -right-8 w-48 sm:w-64 h-48 sm:h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-2000"></div>
+                <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl relative">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <i data-lucide="database" class="text-indigo-600 mb-2"></i>
-                            <p class="text-2xl font-bold">100%</p>
+                            <i data-lucide="database" class="text-indigo-600 mb-2 w-5 h-5"></i>
+                            <p class="text-xl sm:text-2xl font-bold">100%</p>
                             <p class="text-xs text-slate-500 uppercase font-bold">Data Integrity</p>
                         </div>
                         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <i data-lucide="activity" class="text-purple-600 mb-2"></i>
-                            <p class="text-2xl font-bold">Real-time</p>
+                            <i data-lucide="activity" class="text-purple-600 mb-2 w-5 h-5"></i>
+                            <p class="text-xl sm:text-2xl font-bold">Real-time</p>
                             <p class="text-xs text-slate-500 uppercase font-bold">Monitoring</p>
                         </div>
                     </div>
                     <div class="mt-4 p-4 bg-indigo-600 rounded-2xl text-white">
-                        <p class="text-sm opacity-80 italic">"Turning Snowflake & QlikSense into actionable insights."</p>
+                        <p class="text-sm opacity-90 italic leading-relaxed">"Turning Snowflake & QlikSense into actionable insights."</p>
+                    </div>
+                    <!-- Skills pills -->
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">Python</span>
+                        <span class="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">SQL</span>
+                        <span class="bg-pink-50 text-pink-700 text-xs font-bold px-3 py-1 rounded-full">Snowflake</span>
+                        <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">QlikSense</span>
+                        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">Grafana</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="projects" class="py-32 bg-slate-100 px-6">
+    <!-- ═══════════════════════════
+         PROJECTS
+    ═══════════════════════════ -->
+    <section id="projects" class="py-20 sm:py-28 bg-slate-100 px-4 sm:px-6">
         <div class="max-w-6xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-16 gap-4">
                 <div>
-                    <h2 class="text-4xl font-extrabold mb-4">Featured Work</h2>
-                    <p class="text-slate-500 max-w-md">A selection of my recent technical projects in data processing and visualization.</p>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold mb-3">Featured Work</h2>
+                    <p class="text-slate-500 max-w-md text-sm sm:text-base">A selection of my recent technical projects in data processing and visualization.</p>
                 </div>
-                <div class="flex space-x-2">
-                    <span class="bg-white dark:bg-slate-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Python</span>
-                    <span class="bg-white dark:bg-slate-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Cloud Data</span>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Python</span>
+                    <span class="bg-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Cloud Data</span>
                 </div>
             </div>
 
-            <div class="carousel-wrapper">
-                <div class="carousel-container" id="projectsCarousel">
-                    <div class="carousel-card">
-                        <div class="reveal group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-72 overflow-hidden bg-slate-900">
-                                <div class="slideshow-container">
-                                    <img src="media/image1.png" alt="Data Quality Hub" class="slide active w-full h-full opacity-80 group-hover:opacity-100 transition duration-700">
-                                    <img src="media/image2.png" alt="Data Quality Hub" class="slide w-full h-full opacity-80 group-hover:opacity-100 transition duration-700">
+            <!-- Mobile swipe hint -->
+            <p class="text-xs text-slate-400 font-semibold text-center mb-3 sm:hidden flex items-center justify-center gap-1">
+                <i data-lucide="move-horizontal" class="w-3 h-3"></i> Swipe to browse
+            </p>
+
+            <div class="carousel-outer" id="projectsOuter">
+                <div class="carousel-track" id="projectsCarousel">
+
+                    <!-- Card 1 -->
+                    <div class="proj-card">
+                        <div class="reveal group bg-white rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500 shadow-sm hover:shadow-xl">
+                            <div class="relative h-56 sm:h-72 overflow-hidden bg-slate-900">
+                                <div class="relative w-full h-full">
+                                    <img src="media/image1.png" alt="DB Monitoring" class="slide active w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700">
+                                    <img src="media/image2.png" alt="DB Monitoring 2" class="slide w-full h-full object-cover opacity-80">
                                 </div>
-                                <div class="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs font-bold uppercase">Axiome Project</div>
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-bold uppercase">Axiome Project</div>
                             </div>
-                            <div class="p-10">
-                                <h3 class="text-2xl font-bold mb-4 italic">Automated DB Monitoring</h3>
-                                <p class="text-slate-600 mb-8 leading-relaxed">Full-stack data pipeline using Python ETLs to capture Oracle metrics into InfluxDB with Grafana visualization.</p>
-                                <div class="flex items-center justify-between">
+                            <div class="p-6 sm:p-10">
+                                <h3 class="text-xl sm:text-2xl font-bold mb-3 italic">Automated DB Monitoring</h3>
+                                <p class="text-slate-600 mb-6 leading-relaxed text-sm sm:text-base">Full-stack data pipeline using Python ETLs to capture Oracle metrics into InfluxDB with Grafana visualization.</p>
+                                <div class="flex items-center justify-between flex-wrap gap-3">
                                     <div class="flex -space-x-2">
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[10px] font-black">PY</div>
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-purple-100 flex items-center justify-center text-[10px] font-black">INF</div>
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-pink-100 flex items-center justify-center text-[10px] font-black">GRA</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[9px] font-black">PY</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-purple-100 flex items-center justify-center text-[9px] font-black">INF</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-pink-100 flex items-center justify-center text-[9px] font-black">GRA</div>
                                     </div>
-                                    <a href="https://github.com/sofiaAylal/stage2024" class="text-indigo-600 font-extrabold flex items-center hover:underline">Codebase <i data-lucide="external-link" class="ml-2 w-4 h-4"></i></a>
+                                    <a href="https://github.com/sofiaAylal/stage2024" target="_blank" class="text-indigo-600 font-extrabold flex items-center hover:underline text-sm">
+                                        Codebase <i data-lucide="external-link" class="ml-1.5 w-4 h-4"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- <div class="carousel-card">
-                        <div class="reveal delay-200 group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-72 overflow-hidden bg-slate-900">
-                                <video class="w-full h-full object-cover opacity-80 group-hover:scale-110 group-hover:opacity-100 transition duration-700" autoplay loop muted playsinline>
-                                    <source src="projects/videos/monitoring_preview.mp4" type="video/mp4">
-                                </video>
-                                <div class="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs font-bold uppercase">Aesio Mutuelle</div>
-                            </div>
-                            <div class="p-10">
-                                <h3 class="text-2xl font-bold mb-4 italic">Data Quality Hub</h3>
-                                <p class="text-slate-600 mb-8 leading-relaxed">Interactive QlikSense dashboards detecting anomalies and streamlining department reporting requests.</p>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex -space-x-2">
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-[10px] font-black">QLIK</div>
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-[10px] font-black">SNOW</div>
-                                    </div>
-                                    <a href="#" class="text-indigo-600 font-extrabold flex items-center hover:underline">Case Study <i data-lucide="eye" class="ml-2 w-4 h-4"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
 
-                    <div class="carousel-card">
-                        <div class="reveal group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-72 overflow-hidden bg-slate-900">
-                                <video class="w-full h-full object-cover opacity-80 group-hover:scale-110 group-hover:opacity-100 transition duration-700" autoplay loop muted playsinline>
+                    <!-- Card 2 -->
+                    <div class="proj-card">
+                        <div class="reveal group bg-white rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500 shadow-sm hover:shadow-xl">
+                            <div class="relative h-56 sm:h-72 overflow-hidden bg-slate-900">
+                                <video class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700" autoplay loop muted playsinline>
                                     <source src="media/weather-app_preview.webm" type="video/webm">
                                     <source src="media/weather-app_preview.mp4" type="video/mp4">
                                 </video>
-                                <div class="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs font-bold uppercase">Live Project</div>
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-bold uppercase">Live Project</div>
                             </div>
-                            <div class="p-10">
-                                <h3 class="text-2xl font-bold mb-4 italic">World Weather App</h3>
-                                <p class="text-slate-600 mb-8 leading-relaxed">An interactive global weather dashboard powered by the <strong>Open Meteo API</strong>. DataViz with dynamic charts using <strong>D3.js</strong>.</p>
-                                <div class="flex items-center justify-between">
+                            <div class="p-6 sm:p-10">
+                                <h3 class="text-xl sm:text-2xl font-bold mb-3 italic">World Weather App</h3>
+                                <p class="text-slate-600 mb-6 leading-relaxed text-sm sm:text-base">An interactive global weather dashboard powered by the <strong>Open Meteo API</strong>. DataViz with dynamic charts using <strong>D3.js</strong>.</p>
+                                <div class="flex items-center justify-between flex-wrap gap-3">
                                     <div class="flex -space-x-2">
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-yellow-100 flex items-center justify-center text-[10px] font-black">HTML</div>
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-[10px] font-black">D3</div>
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-green-100 flex items-center justify-center text-[10px] font-black">API</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-yellow-100 flex items-center justify-center text-[9px] font-black">HTML</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-[9px] font-black">D3</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-green-100 flex items-center justify-center text-[9px] font-black">API</div>
                                     </div>
-                                    <a href="https://weather-app-l8ol.onrender.com/" target="_blank" class="text-indigo-600 font-extrabold flex items-center hover:underline">Live Demo <i data-lucide="external-link" class="ml-2 w-4 h-4"></i></a>
+                                    <a href="https://weather-app-l8ol.onrender.com/" target="_blank" class="text-indigo-600 font-extrabold flex items-center hover:underline text-sm">
+                                        Live Demo <i data-lucide="external-link" class="ml-1.5 w-4 h-4"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="carousel-card">
-                        <div class="reveal delay-200 group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-72 overflow-hidden bg-slate-900">
-                                <video class="w-full h-full object-cover opacity-80 group-hover:scale-110 group-hover:opacity-100 transition duration-700" autoplay loop muted playsinline>
+                    <!-- Card 3 -->
+                    <div class="proj-card">
+                        <div class="reveal group bg-white rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500 shadow-sm hover:shadow-xl">
+                            <div class="relative h-56 sm:h-72 overflow-hidden bg-slate-900">
+                                <video class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700" autoplay loop muted playsinline>
                                     <source src="media/mental-health-dashboard_preview.webm" type="video/webm">
                                     <source src="media/mental-health-dashboard_preview.mp4" type="video/mp4">
                                 </video>
-                                <div class="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs font-bold uppercase">Live Project</div>
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-bold uppercase">Live Project</div>
                             </div>
-                            <div class="p-10">
-                                <h3 class="text-2xl font-bold mb-4 italic">Mental Health Analytics</h3>
-                                <p class="text-slate-600 mb-8 leading-relaxed">Dynamic dashboard featuring interactive D3.js heatmaps and customizable filters for deep data exploration.</p>
-                                <div class="flex items-center justify-between">
+                            <div class="p-6 sm:p-10">
+                                <h3 class="text-xl sm:text-2xl font-bold mb-3 italic">Mental Health Analytics</h3>
+                                <p class="text-slate-600 mb-6 leading-relaxed text-sm sm:text-base">Dynamic dashboard featuring interactive D3.js heatmaps and customizable filters for deep data exploration.</p>
+                                <div class="flex items-center justify-between flex-wrap gap-3">
                                     <div class="flex -space-x-2">
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-orange-100 flex items-center justify-center text-[10px] font-black">DATA</div>
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-[10px] font-black">D3</div>
-                                        <div class="w-10 h-10 rounded-full border-2 border-white bg-rose-100 flex items-center justify-center text-[10px] font-black">FILT</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-orange-100 flex items-center justify-center text-[9px] font-black">DATA</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-[9px] font-black">D3</div>
+                                        <div class="w-9 h-9 rounded-full border-2 border-white bg-rose-100 flex items-center justify-center text-[9px] font-black">FILT</div>
                                     </div>
-                                    <a href="https://mental-health-dashboard-12di.onrender.com/" target="_blank" class="text-indigo-600 font-extrabold flex items-center hover:underline">Live Demo <i data-lucide="external-link" class="ml-2 w-4 h-4"></i></a>
+                                    <a href="https://mental-health-dashboard-12di.onrender.com/" target="_blank" class="text-indigo-600 font-extrabold flex items-center hover:underline text-sm">
+                                        Live Demo <i data-lucide="external-link" class="ml-1.5 w-4 h-4"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
-                
-                <button class="absolute top-1/2 -translate-y-1/2 left-0 z-20 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center cursor-pointer transition shadow-lg" onclick="scrollCarousel(-1)">
-                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+
+                <!-- Arrows (hidden on mobile via CSS) -->
+                <button class="carousel-btn carousel-btn-prev" onclick="scrollCarousel('projectsCarousel', -1)" aria-label="Previous">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
                 </button>
-                <button class="absolute top-1/2 -translate-y-1/2 right-0 z-20 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center cursor-pointer transition shadow-lg" onclick="scrollCarousel(1)">
-                    <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                <button class="carousel-btn carousel-btn-next" onclick="scrollCarousel('projectsCarousel', 1)" aria-label="Next">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
                 </button>
             </div>
+
+            <!-- Dots -->
+            <div class="scroll-dots" id="projectsDots">
+                <div class="scroll-dot active"></div>
+                <div class="scroll-dot"></div>
+                <div class="scroll-dot"></div>
+            </div>
+        </div>
     </section>
 
-    <section id="interests" class="py-32 px-6">
+    <!-- ═══════════════════════════
+         INTERESTS
+    ═══════════════════════════ -->
+    <section id="interests" class="py-20 sm:py-28 px-4 sm:px-6">
         <div class="max-w-6xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-16 gap-4">
                 <div>
-                    <h2 class="text-4xl font-extrabold mb-4">Personal Interests</h2>
-                    <p class="text-slate-500 max-w-md">Beyond code, these are the passions that fuel my creativity and curiosity.</p>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold mb-3">Personal Interests</h2>
+                    <p class="text-slate-500 max-w-md text-sm sm:text-base">Beyond code, these are the passions that fuel my creativity and curiosity.</p>
                 </div>
-                <div class="flex space-x-2">
-                    <span class="bg-white dark:bg-slate-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Hobbies</span>
-                    <span class="bg-white dark:bg-slate-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Inspiration</span>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Hobbies</span>
+                    <span class="bg-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Inspiration</span>
                 </div>
             </div>
 
-            <div class="carousel-wrapper">
-                <div class="carousel-container interests-container" id="interestsCarousel">
-                    <div class="carousel-card mini-card">
-                        <div class="reveal group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-48 overflow-hidden bg-slate-900">
-                                <img src="media/Cooking/Cooking (12).jpeg" alt="Machine Learning" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700">
-                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold uppercase">Food</div>
+            <p class="text-xs text-slate-400 font-semibold text-center mb-3 sm:hidden flex items-center justify-center gap-1">
+                <i data-lucide="move-horizontal" class="w-3 h-3"></i> Swipe to browse
+            </p>
+
+            <div class="carousel-outer">
+                <div class="carousel-track" id="interestsCarousel">
+
+                    <div class="interest-card">
+                        <div class="reveal group bg-white rounded-[1.5rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500 shadow-sm hover:shadow-xl h-full">
+                            <div class="relative h-44 overflow-hidden bg-slate-900">
+                                <img src="media/Cooking/Cooking (12).jpeg" alt="Cooking" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700">
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold">Food</div>
                             </div>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold mb-3 italic">Cooking</h3>
-                                <p class="text-slate-600 mb-6 leading-relaxed text-sm">Exploring new recipes and techniques to create delicious meals.</p>
+                            <div class="p-5">
+                                <h3 class="text-lg font-bold mb-2 italic">Cooking</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed mb-4">Exploring new recipes and techniques to create delicious meals.</p>
                                 <div class="flex items-center justify-between">
-                                    <div class="flex -space-x-2">
-                                        <div class="flex -space-x-2">
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-base shadow-sm">
-                                                🍰
-                                            </div>
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-purple-100 flex items-center justify-center text-base shadow-sm">
-                                                🍜
-                                            </div>
-                                        </div>
+                                    <div class="flex -space-x-1.5">
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-sm">🍰</div>
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-purple-100 flex items-center justify-center text-sm">🍜</div>
                                     </div>
-                                    <a href="cooking.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-sm">See more<i data-lucide="external-link" class="ml-1 w-3 h-3"></i></a>
+                                    <a href="cooking.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-xs">
+                                        See more <i data-lucide="external-link" class="ml-1 w-3 h-3"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="carousel-card mini-card">
-                        <div class="reveal delay-200 group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-48 overflow-hidden bg-slate-900">
-                                <img src="media/Drawing/Drawing (2).jpeg" alt="Open Source" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700">
-                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold uppercase">Sketch</div>
+                    <div class="interest-card">
+                        <div class="reveal group bg-white rounded-[1.5rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500 shadow-sm hover:shadow-xl h-full">
+                            <div class="relative h-44 overflow-hidden bg-slate-900">
+                                <img src="media/Drawing/Drawing (2).jpeg" alt="Drawing" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700">
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold">Sketch</div>
                             </div>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold mb-3 italic">Drawing</h3>
-                                <p class="text-slate-600 mb-6 leading-relaxed text-sm">Exploring various drawing techniques and mediums to express creativity.</p>
+                            <div class="p-5">
+                                <h3 class="text-lg font-bold mb-2 italic">Drawing</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed mb-4">Exploring various drawing techniques and mediums to express creativity.</p>
                                 <div class="flex items-center justify-between">
-                                    <div class="flex -space-x-2">
-                                        <div class="flex -space-x-2">
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-base shadow-sm">
-                                                🎨
-                                            </div>
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-base shadow-sm">
-                                                ✏️
-                                            </div>
-                                        </div>
+                                    <div class="flex -space-x-1.5">
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-sm">🎨</div>
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-sm">✏️</div>
                                     </div>
-                                    <a href="drawing.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-sm">See more<i data-lucide="external-link" class="ml-1 w-3 h-3"></i></a>
+                                    <a href="drawing.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-xs">
+                                        See more <i data-lucide="external-link" class="ml-1 w-3 h-3"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="carousel-card mini-card">
-                        <div class="reveal group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-48 overflow-hidden bg-slate-900">
+                    <div class="interest-card">
+                        <div class="reveal group bg-white rounded-[1.5rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500 shadow-sm hover:shadow-xl h-full">
+                            <div class="relative h-44 overflow-hidden bg-slate-900">
                                 <img src="media/Pictures/Pictures (1).jpeg" alt="Photography" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700">
-                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold uppercase">Photo</div>
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold">Photo</div>
                             </div>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold mb-3 italic">Photography</h3>
-                                <p class="text-slate-600 mb-6 leading-relaxed text-sm">Capturing moments and exploring visual storytelling through lenses.</p>
+                            <div class="p-5">
+                                <h3 class="text-lg font-bold mb-2 italic">Photography</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed mb-4">Capturing moments and exploring visual storytelling through lenses.</p>
                                 <div class="flex items-center justify-between">
-                                    <div class="flex -space-x-2">
-                                        <div class="flex -space-x-2">
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-yellow-100 flex items-center justify-center text-base shadow-sm">
-                                                📸
-                                            </div>
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-base shadow-sm">
-                                                🎞️
-                                            </div>
-                                        </div>
+                                    <div class="flex -space-x-1.5">
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-yellow-100 flex items-center justify-center text-sm">📸</div>
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-sm">🎞️</div>
                                     </div>
-                                    <a href="photography.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-sm">See more<i data-lucide="external-link" class="ml-1 w-3 h-3"></i></a>
+                                    <a href="photography.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-xs">
+                                        See more <i data-lucide="external-link" class="ml-1 w-3 h-3"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="carousel-card mini-card">
-                        <div class="reveal delay-200 group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
-                            <div class="relative h-48 overflow-hidden bg-slate-900">
+                    <div class="interest-card">
+                        <div class="reveal group bg-white rounded-[1.5rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500 shadow-sm hover:shadow-xl h-full">
+                            <div class="relative h-44 overflow-hidden bg-slate-900">
                                 <img src="media/Japan/Japan (4).jpeg" alt="Travel" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-700">
-                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold uppercase">Travel</div>
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold">Travel</div>
                             </div>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold mb-3 italic">Cultural Travels</h3>
-                                <p class="text-slate-600 mb-6 leading-relaxed text-sm">Discovering new cultures and perspectives around the world.</p>
+                            <div class="p-5">
+                                <h3 class="text-lg font-bold mb-2 italic">Cultural Travels</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed mb-4">Discovering new cultures and perspectives around the world.</p>
                                 <div class="flex items-center justify-between">
-                                    <div class="flex -space-x-2">
-                                        <div class="flex -space-x-2">
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-orange-100 flex items-center justify-center text-base shadow-sm">
-                                                🗺️
-                                            </div>
-                                            <div class="w-8 h-8 rounded-full border-2 border-white bg-rose-100 flex items-center justify-center text-base shadow-sm">
-                                                🗾
-                                            </div>
-                                        </div>
+                                    <div class="flex -space-x-1.5">
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-orange-100 flex items-center justify-center text-sm">🗺️</div>
+                                        <div class="w-7 h-7 rounded-full border-2 border-white bg-rose-100 flex items-center justify-center text-sm">🗾</div>
                                     </div>
-                                    <a href="cultural-travels.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-sm">See more<i data-lucide="external-link" class="ml-1 w-3 h-3"></i></a>
+                                    <a href="cultural-travels.html" class="text-indigo-600 font-extrabold flex items-center hover:underline text-xs">
+                                        See more <i data-lucide="external-link" class="ml-1 w-3 h-3"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
-                
+            </div>
+
+            <div class="scroll-dots" id="interestsDots">
+                <div class="scroll-dot active"></div>
+                <div class="scroll-dot"></div>
+                <div class="scroll-dot"></div>
+                <div class="scroll-dot"></div>
             </div>
         </div>
     </section>
 
-    <section id="experience" class="py-32 px-6">
+    <!-- ═══════════════════════════
+         EXPERIENCE / JOURNEY
+    ═══════════════════════════ -->
+    <section id="experience" class="py-20 sm:py-28 px-4 sm:px-6 bg-slate-50">
         <div class="max-w-4xl mx-auto">
-            <h2 class="text-4xl font-extrabold mb-20 text-center">My Professional Journey</h2>
-            
-            <div class="relative border-l-2 border-slate-200 ml-4 space-y-16">
-                <div class="relative pl-12 reveal">
-                    <div class="absolute -left-3 top-0 w-6 h-6 bg-indigo-600 rounded-full ring-8 ring-indigo-100"></div>
-                    <span class="text-sm font-black text-indigo-600 uppercase tracking-tighter">Sept 2024 — Present</span>
-                    <h3 class="text-2xl font-bold mt-2">Data Analyst Apprentice <span class="text-slate-400 font-normal">@ Aesio Mutuelle</span></h3>
-                    <p class="mt-4 text-slate-600 leading-relaxed">Focusing on reporting automation, dashboard optimization via QlikSense, and cross-team collaboration for data quality control.</p>
+            <h2 class="text-3xl sm:text-4xl font-extrabold mb-14 sm:mb-20 text-center">My Professional Journey</h2>
+
+            <div class="relative border-l-2 border-slate-200 ml-3 sm:ml-4 space-y-12 sm:space-y-16">
+
+                <div class="relative pl-8 sm:pl-12 reveal">
+                    <div class="absolute -left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 bg-indigo-600 rounded-full ring-4 sm:ring-8 ring-indigo-100"></div>
+                    <span class="text-xs sm:text-sm font-black text-indigo-600 uppercase tracking-tighter">Sept 2024 — Present</span>
+                    <h3 class="text-xl sm:text-2xl font-bold mt-2 leading-snug">
+                        Data Analyst Apprentice <span class="text-slate-400 font-normal block sm:inline">@ Aesio Mutuelle</span>
+                    </h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed text-sm sm:text-base">Focusing on reporting automation, dashboard optimization via QlikSense, and cross-team collaboration for data quality control.</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">QlikSense</span>
+                        <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">Snowflake</span>
+                        <span class="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">SQL</span>
+                    </div>
                 </div>
 
-                <div class="relative pl-12 reveal">
-                    <div class="absolute -left-3 top-0 w-6 h-6 bg-slate-200 rounded-full group-hover:bg-indigo-600 transition"></div>
-                    <span class="text-sm font-black text-slate-400 uppercase tracking-tighter">Apr 2024 — June 2024</span>
-                    <h3 class="text-2xl font-bold mt-2">Data Analyst Intern <span class="text-slate-400 font-normal">@ Axiome</span></h3>
-                    <p class="mt-4 text-slate-600 leading-relaxed">Pioneered an Oracle-to-InfluxDB pipeline. Reduced manual monitoring time by implementing real-time Grafana alerts.</p>
+                <div class="relative pl-8 sm:pl-12 reveal">
+                    <div class="absolute -left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 bg-slate-300 rounded-full"></div>
+                    <span class="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-tighter">Apr 2024 — June 2024</span>
+                    <h3 class="text-xl sm:text-2xl font-bold mt-2 leading-snug">
+                        Data Analyst Intern <span class="text-slate-400 font-normal block sm:inline">@ Axiome</span>
+                    </h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed text-sm sm:text-base">Pioneered an Oracle-to-InfluxDB pipeline. Reduced manual monitoring time by implementing real-time Grafana alerts.</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">Python</span>
+                        <span class="bg-orange-50 text-orange-700 text-xs font-bold px-3 py-1 rounded-full">InfluxDB</span>
+                        <span class="bg-pink-50 text-pink-700 text-xs font-bold px-3 py-1 rounded-full">Grafana</span>
+                    </div>
                 </div>
 
-                <div class="relative pl-12 reveal">
-                    <div class="absolute -left-3 top-0 w-6 h-6 bg-purple-600 rounded-full ring-8 ring-purple-100"></div>
-                    <span class="text-sm font-black text-purple-600 uppercase tracking-tighter">2024 — 2027</span>
-                    <h3 class="text-2xl font-bold mt-2">Degree in Data Engineering</h3>
-                    <p class="text-slate-500">Télécom Saint-Étienne</p>
+                <div class="relative pl-8 sm:pl-12 reveal">
+                    <div class="absolute -left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 bg-purple-600 rounded-full ring-4 sm:ring-8 ring-purple-100"></div>
+                    <span class="text-xs sm:text-sm font-black text-purple-600 uppercase tracking-tighter">2024 — 2027</span>
+                    <h3 class="text-xl sm:text-2xl font-bold mt-2">Degree in Data Engineering</h3>
+                    <p class="text-slate-500 mt-1 text-sm sm:text-base">Télécom Saint-Étienne</p>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <footer class="bg-slate-900 text-white py-20 px-6 dark:bg-gray-800">
+    <!-- ═══════════════════════════
+         FOOTER
+    ═══════════════════════════ -->
+    <footer class="bg-slate-900 text-white py-16 sm:py-20 px-4 sm:px-6">
         <div class="max-w-6xl mx-auto flex flex-col items-center">
-            <h2 class="text-4xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">Ready to analyze?</h2>
-            <p class="text-slate-300 mb-12 text-center max-w-sm dark:text-gray-300">I'm currently looking for new challenges and internship opportunities.</p>
-            <div class="flex space-x-6 mb-16">
-                <a href="https://www.linkedin.com/in/sofia-aylal-a054642a1/" class="w-14 h-14 bg-white/10 dark:bg-indigo-600/20 rounded-2xl flex items-center justify-center hover:bg-indigo-600 dark:hover:bg-indigo-500 transition"><i data-lucide="linkedin"></i></a>
-                <a href="https://github.com/sofiaAylal" class="w-14 h-14 bg-white/10 dark:bg-indigo-600/20 rounded-2xl flex items-center justify-center hover:bg-indigo-600 dark:hover:bg-indigo-500 transition"><i data-lucide="github"></i></a>
-                <a href="mailto:sofiaa.aylal@gmail.com" class="w-14 h-14 bg-white/10 dark:bg-indigo-600/20 rounded-2xl flex items-center justify-center hover:bg-indigo-600 dark:hover:bg-indigo-500 transition"><i data-lucide="mail"></i></a>
+            <h2 class="text-3xl sm:text-4xl font-extrabold mb-5 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 text-center">Ready to analyze?</h2>
+            <p class="text-slate-300 mb-10 sm:mb-12 text-center max-w-xs sm:max-w-sm text-sm sm:text-base">I'm currently looking for new challenges and internship opportunities.</p>
+            <div class="flex gap-4 sm:gap-6 mb-12 sm:mb-16">
+                <a href="https://www.linkedin.com/in/sofia-aylal-a054642a1/" target="_blank" aria-label="LinkedIn"
+                   class="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-indigo-600 transition">
+                    <i data-lucide="linkedin" class="w-5 h-5"></i>
+                </a>
+                <a href="https://github.com/sofiaAylal" target="_blank" aria-label="GitHub"
+                   class="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-indigo-600 transition">
+                    <i data-lucide="github" class="w-5 h-5"></i>
+                </a>
+                <a href="/cdn-cgi/l/email-protection#3f4c5059565e5e115e46535e537f58525e5653115c5052" aria-label="Email" class="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-indigo-600 transition">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                </a>
             </div>
-            <p class="text-slate-500 text-sm font-medium dark:text-gray-400">© 2026 Designed by Sofia Aylal. Built with Passion & Creativity.</p>
+            <p class="text-slate-500 text-xs sm:text-sm font-medium text-center">© 2026 Designed by Sofia Aylal. Built with Passion & Creativity.</p>
         </div>
     </footer>
 
-    <script>
-        // Initialize Icons
+    <!-- ═══════════════════════════
+         SCRIPTS
+    ═══════════════════════════ -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         lucide.createIcons();
 
-        // Dark Mode Toggle: toggle a single 'dark' class on body
+        /* ── Dark mode ── */
         function toggleDarkMode() {
             const body = document.getElementById('body');
-            const icon = document.getElementById('themeIcon');
             body.classList.toggle('dark');
-            // keep utilities for overall page background/text if desired
             body.classList.toggle('bg-slate-950');
             body.classList.toggle('text-white');
         }
 
-        // Scroll Progress Bar + Reveal handling
-        function handleScroll() {
-            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            let scrolled = (winScroll / height) * 100;
-            document.getElementById("scrollProgress").style.width = scrolled + "%";
-
-            // Reveal on scroll
-            const reveals = document.querySelectorAll(".reveal");
-            reveals.forEach(reveal => {
-                let windowHeight = window.innerHeight;
-                let elementTop = reveal.getBoundingClientRect().top;
-                if (elementTop < windowHeight - 100) reveal.classList.add("active");
-            });
+        /* ── Mobile menu ── */
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('open');
+        }
+        function closeMobileMenu() {
+            document.getElementById('mobileMenu').classList.remove('open');
         }
 
-        // Bind events
+        /* ── Scroll progress + reveal ── */
+        function handleScroll() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            document.getElementById('scrollProgress').style.width = ((winScroll / height) * 100) + '%';
+            document.querySelectorAll('.reveal').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 80) el.classList.add('active');
+            });
+            updateDots('projectsCarousel',  'projectsDots');
+            updateDots('interestsCarousel', 'interestsDots');
+        }
         window.addEventListener('scroll', handleScroll);
         window.addEventListener('resize', handleScroll);
-
-        // Run once on load so elements visible at the top are revealed immediately
-        // (script is at end of body, so DOM elements are present)
         handleScroll();
 
-        // Slideshow functionality
+        /* ── Slideshow ── */
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         if (slides.length > 0) {
@@ -455,43 +617,43 @@
             }, 4000);
         }
 
-        // Carousel functionality
-        function scrollCarousel(direction) {
-            const carousel = document.getElementById('projectsCarousel');
-            const cards = carousel.querySelectorAll('.carousel-card');
-            const cardWidth = cards[0].offsetWidth + 48; // Largeur + gap (48px)
-            
-            // Calcul de la position maximale de scroll possible
-            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-            
-            // Si on est à la fin et qu'on veut aller à droite -> Retour au début
-            if (direction === 1 && carousel.scrollLeft >= maxScrollLeft - 10) {
-                carousel.scrollTo({ left: 0, behavior: 'smooth' });
-            } 
-            // Si on est au début et qu'on veut aller à gauche -> Aller à la fin
-            else if (direction === -1 && carousel.scrollLeft <= 10) {
-                carousel.scrollTo({ left: maxScrollLeft, behavior: 'smooth' });
-            } 
-            // Sinon, scroll normal d'une carte
-            else {
-                carousel.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
-            }
-        }
+        /* ── Generic carousel scroll ── */
+        function scrollCarousel(carouselId, direction) {
+            const carousel = document.getElementById(carouselId);
+            const card = carousel.querySelector('.proj-card, .interest-card');
+            const gap = parseInt(getComputedStyle(carousel).gap) || 20;
+            const cardWidth = card.offsetWidth + gap;
+            const max = carousel.scrollWidth - carousel.clientWidth;
 
-        function scrollInterestsCarousel(direction) {
-            const carousel = document.getElementById('interestsCarousel');
-            const cards = carousel.querySelectorAll('.mini-card');
-            const cardWidth = cards[0].offsetWidth + 48;
-            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-
-            if (direction === 1 && carousel.scrollLeft >= maxScrollLeft - 10) {
+            if (direction === 1 && carousel.scrollLeft >= max - 10) {
                 carousel.scrollTo({ left: 0, behavior: 'smooth' });
             } else if (direction === -1 && carousel.scrollLeft <= 10) {
-                carousel.scrollTo({ left: maxScrollLeft, behavior: 'smooth' });
+                carousel.scrollTo({ left: max, behavior: 'smooth' });
             } else {
                 carousel.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
             }
         }
+
+        /* ── Dot indicators ── */
+        function updateDots(carouselId, dotsId) {
+            const carousel = document.getElementById(carouselId);
+            if (!carousel) return;
+            const dotsContainer = document.getElementById(dotsId);
+            if (!dotsContainer) return;
+            const dots = dotsContainer.querySelectorAll('.scroll-dot');
+            if (!dots.length) return;
+
+            const card = carousel.querySelector('.proj-card, .interest-card');
+            if (!card) return;
+            const gap = parseInt(getComputedStyle(carousel).gap) || 20;
+            const cardWidth = card.offsetWidth + gap;
+            const index = Math.round(carousel.scrollLeft / cardWidth);
+            dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        }
+
+        /* update dots on carousel scroll too */
+        document.getElementById('projectsCarousel').addEventListener('scroll',  () => updateDots('projectsCarousel',  'projectsDots'));
+        document.getElementById('interestsCarousel').addEventListener('scroll', () => updateDots('interestsCarousel', 'interestsDots'));
     </script>
 </body>
 </html>
