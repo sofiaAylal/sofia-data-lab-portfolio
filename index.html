@@ -159,8 +159,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="carousel-card">
+                    
+                    <!-- <div class="carousel-card">
                         <div class="reveal delay-200 group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
                             <div class="relative h-72 overflow-hidden bg-slate-900">
                                 <video class="w-full h-full object-cover opacity-80 group-hover:scale-110 group-hover:opacity-100 transition duration-700" autoplay loop muted playsinline>
@@ -180,7 +180,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="carousel-card">
                         <div class="reveal group bg-white rounded-[2rem] overflow-hidden border border-white hover:border-indigo-200 transition-all duration-500">
@@ -459,47 +459,38 @@
         function scrollCarousel(direction) {
             const carousel = document.getElementById('projectsCarousel');
             const cards = carousel.querySelectorAll('.carousel-card');
-            const cardWidth = cards[0].offsetWidth + 48; // card width + gap
-            const totalCards = cards.length;
+            const cardWidth = cards[0].offsetWidth + 48; // Largeur + gap (48px)
             
-            // Calculate current scroll position in cards
-            const currentPosition = Math.round(carousel.scrollLeft / cardWidth);
-            let newPosition = currentPosition + direction; // Move by 1 card at a time
+            // Calcul de la position maximale de scroll possible
+            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
             
-            // Loop infinitely
-            if (newPosition >= totalCards) {
-                newPosition = 0;
-            } else if (newPosition < 0) {
-                newPosition = totalCards - 1;
+            // Si on est à la fin et qu'on veut aller à droite -> Retour au début
+            if (direction === 1 && carousel.scrollLeft >= maxScrollLeft - 10) {
+                carousel.scrollTo({ left: 0, behavior: 'smooth' });
+            } 
+            // Si on est au début et qu'on veut aller à gauche -> Aller à la fin
+            else if (direction === -1 && carousel.scrollLeft <= 10) {
+                carousel.scrollTo({ left: maxScrollLeft, behavior: 'smooth' });
+            } 
+            // Sinon, scroll normal d'une carte
+            else {
+                carousel.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
             }
-            
-            carousel.scrollTo({
-                left: newPosition * cardWidth,
-                behavior: 'smooth'
-            });
         }
 
         function scrollInterestsCarousel(direction) {
             const carousel = document.getElementById('interestsCarousel');
             const cards = carousel.querySelectorAll('.mini-card');
-            const cardWidth = cards[0].offsetWidth + 48; // card width + gap
-            const totalCards = cards.length;
-            
-            // Calculate current scroll position in cards
-            const currentPosition = Math.round(carousel.scrollLeft / cardWidth);
-            let newPosition = currentPosition + direction; // Move by 1 card at a time
-            
-            // Loop infinitely
-            if (newPosition >= totalCards) {
-                newPosition = 0;
-            } else if (newPosition < 0) {
-                newPosition = totalCards - 1;
+            const cardWidth = cards[0].offsetWidth + 48;
+            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+
+            if (direction === 1 && carousel.scrollLeft >= maxScrollLeft - 10) {
+                carousel.scrollTo({ left: 0, behavior: 'smooth' });
+            } else if (direction === -1 && carousel.scrollLeft <= 10) {
+                carousel.scrollTo({ left: maxScrollLeft, behavior: 'smooth' });
+            } else {
+                carousel.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
             }
-            
-            carousel.scrollTo({
-                left: newPosition * cardWidth,
-                behavior: 'smooth'
-            });
         }
     </script>
 </body>
