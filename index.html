@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Prevent dark mode flash */if(localStorage.getItem("theme")==="dark"){document.documentElement.style.backgroundColor="#0f172a";document.documentElement.style.colorScheme="dark";}</script>
     <title>Sofia Aylal | Data Engineer & Analyst Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -574,13 +575,29 @@
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         lucide.createIcons();
 
-        /* ── Dark mode ── */
-        function toggleDarkMode() {
+        /* ── Dark mode (persistent via localStorage) ── */
+        function applyTheme(dark) {
             const body = document.getElementById('body');
-            body.classList.toggle('dark');
-            body.classList.toggle('bg-slate-950');
-            body.classList.toggle('text-white');
+            body.classList.toggle('dark', dark);
+            body.classList.toggle('bg-slate-950', dark);
+            body.classList.toggle('text-white', dark);
+            ['themeIcon','themeIconMobile'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.setAttribute('data-lucide', dark ? 'sun' : 'moon');
+                el.className = `w-4 h-4 ${dark ? 'text-slate-100' : 'text-slate-700'}`;
+            });
+            lucide.createIcons();
         }
+
+        function toggleDarkMode() {
+            const isDark = !document.getElementById('body').classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            applyTheme(isDark);
+        }
+
+        /* Apply saved theme immediately on load */
+        applyTheme(localStorage.getItem('theme') === 'dark');
 
         /* ── Mobile menu ── */
         function toggleMobileMenu() {

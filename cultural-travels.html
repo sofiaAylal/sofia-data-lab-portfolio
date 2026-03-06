@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Prevent dark mode flash */if(localStorage.getItem("theme")==="dark"){document.documentElement.style.backgroundColor="#0f172a";document.documentElement.style.colorScheme="dark";}</script>
     <title>Sofia Aylal | Cultural Travels</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -127,7 +128,7 @@
                 </button>
             </div>
 
-            <a href="mailto:sofiaa.aylal@gmail.com" class="hidden md:inline-flex bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:scale-105 transition shadow-lg">Contact Me</a>
+            <a href="/cdn-cgi/l/email-protection#32415d545b53531c534b5e535e72555f535b5e1c515d5f" class="hidden md:inline-flex bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:scale-105 transition shadow-lg">Contact Me</a>
         </div>
 
         <!-- Mobile dropdown -->
@@ -135,7 +136,7 @@
             <a href="#about"     onclick="closeMobileMenu()" class="block py-2.5 font-semibold text-sm uppercase tracking-wider hover:text-indigo-600 transition border-b border-slate-100">About</a>
             <a href="#library"   onclick="closeMobileMenu()" class="block py-2.5 font-semibold text-sm uppercase tracking-wider hover:text-indigo-600 transition border-b border-slate-100">Library</a>
             <a href="index.html" onclick="closeMobileMenu()" class="block py-2.5 font-semibold text-sm uppercase tracking-wider hover:text-indigo-600 transition border-b border-slate-100">Portfolio</a>
-            <a href="mailto:sofiaa.aylal@gmail.com" class="mt-3 block text-center bg-indigo-600 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 transition">Contact Me</a>
+            <a href="/cdn-cgi/l/email-protection#ed9e828b848c8cc38c94818c81ad8a808c8481c38e8280" class="mt-3 block text-center bg-indigo-600 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 transition">Contact Me</a>
         </div>
     </nav>
 
@@ -221,7 +222,7 @@
         </div>
     </footer>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         lucide.createIcons();
 
         /* ── Lightbox state ── */
@@ -291,19 +292,24 @@
             document.getElementById('mobileMenu').classList.remove('open');
         }
 
-        /* ── Dark mode ── */
-        function toggleDarkMode() {
+        /* ── Dark mode (persistent) ── */
+        function applyTheme(dark) {
             const body = document.getElementById('body');
-            body.classList.toggle('dark');
-            const isDark = body.classList.contains('dark');
+            body.classList.toggle('dark', dark);
             ['themeIcon','themeIconMobile'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-                el.className = `w-4 h-4 ${isDark ? 'text-slate-100' : 'text-slate-700'}`;
+                el.setAttribute('data-lucide', dark ? 'sun' : 'moon');
+                el.className = `w-4 h-4 ${dark ? 'text-slate-100' : 'text-slate-700'}`;
             });
             lucide.createIcons();
         }
+        function toggleDarkMode() {
+            const isDark = !document.getElementById('body').classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            applyTheme(isDark);
+        }
+        applyTheme(localStorage.getItem('theme') === 'dark');
 
         /* ── Scroll progress + reveal ── */
         function handleScroll() {
